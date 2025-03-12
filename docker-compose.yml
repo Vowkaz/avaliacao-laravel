@@ -1,0 +1,54 @@
+services:
+    app:
+        build:
+            args:
+                user: autogestor
+                uid: 1000
+            context: ./
+            dockerfile: docker/Dockerfile
+        container_name: autogestor-app
+        restart: unless-stopped
+        working_dir: /var/www/
+        env_file: .env
+        environment:
+            - APP_ENV=${APP_ENV}
+        volumes:
+            - ./:/var/www:delegated
+        networks:
+            - autogestor
+        command: /bin/bash -c "composer install && php-fpm"
+
+    db:
+        image: mariadb:latest
+        container_name: autogestor-db
+        restart: unless-stopped
+        environment:
+            MYSQL_DATABASE: ${DB_DATABASE:-autogestor_db}
+            MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-root}
+            MYSQL_USER: ${DB_USERNAME:-autogestor_user}
+            MYSQL_PASSWORD: ${DB_PASSWORD:-root}
+            TZ: America/Sao_Paulo
+        ports:
+            - "3306:3306"
+        volumes:
+            - ./docker/mysql:/var/lib/mysql
+        networks:
+            - autogestor
+
+
+    server:
+        image: nginx:alpine
+        container_name: autogestor-server
+        restart: unless-stopped
+        ports:
+            - "80:80"
+        volumes:
+            - ./:/var/www:delegated
+            - ./docker/nginx/${APP_ENV}/:/etc/nginx/conf.d
+        networks:
+            - autogestor
+
+networks:
+    autogestor:
+        name: autogestor
+        driver: bridge
