@@ -9,8 +9,14 @@ use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
+
+    public const ROLE_ADMIN = 'admin';
+    public const ROLE_COMMON = 'common';
+    public const ROLE_LABELS = [
+        self::ROLE_ADMIN => 'Administrador',
+        self::ROLE_COMMON => 'Comum',
+    ];
 
     /**
      * The attributes that are mass assignable.
@@ -21,6 +27,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
     ];
 
     /**
@@ -31,6 +38,7 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'role',
     ];
 
     /**

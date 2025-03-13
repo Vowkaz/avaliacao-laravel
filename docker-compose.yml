@@ -18,6 +18,16 @@ services:
             - autogestor
         command: /bin/bash -c "composer install && php-fpm"
 
+    node:
+        image: node:18
+        working_dir: /var/www
+        container_name: autogestor-node
+        volumes:
+            - ./:/var/www
+        networks:
+            - autogestor
+        command: sh -c "npm install && npm run dev"
+
     db:
         image: mariadb:latest
         container_name: autogestor-db
