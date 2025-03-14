@@ -10,7 +10,7 @@
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             @if (session('error') || session('success'))
-                <div class="white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-4 mb-4 rounded">
+                <div class="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-4 mb-4 rounded">
                     {{ session('error') ?? session('success')}}
                 </div>
             @endif
@@ -34,7 +34,12 @@
                         <tr>
                             <th class="px-2 py-2 border-b text-start">{{ __('Nome') }}</th>
                             <th class="py-2 border-b text-start">{{ __('Email') }}</th>
-                            <th class="py-2 border-b text-start">{{ __('Role') }}</th>
+                            <th class="py-2 border-b text-start">{{ __('Cargo') }}</th>
+
+                            {{--                                debug de permissao e role --}}
+                            {{--                            <th class="py-2 border-b text-start">{{ __('Roles') }}</th>--}}
+                            {{--                            <th class="py-2 border-b text-start">{{ __('Permissions') }}</th>--}}
+
                             <th class="py-2 border-b text-start">{{ __('Data de Criação') }}</th>
                             @can('gestao-usuarios')
                                 <th class="py-2 border-b text-start">{{ __('') }}</th>
@@ -46,6 +51,11 @@
                             <tr>
                                 <td class="px-2 py-2 border-b">{{ $user->name }}</td>
                                 <td class="py-2 border-b">{{ $user->email }}</td>
+
+                                {{--                                debug de permissao e role --}}
+                                {{--                                <td class="py-2 border-b">{{ $user->roles->pluck('name') }}</td>--}}
+                                {{--                                <td class="py-2 border-b">{{ $user->permissions->pluck('name') }}</td>--}}
+
                                 <td class="py-2 border-b">{{ Arr::get(User::ROLE_LABELS, $user->role, User::ROLE_COMMON) }}</td>
                                 <td class="py-2 border-b">{{ $user->created_at->format('d/m/Y') }}</td>
                                 @can('gestao-usuarios')
@@ -177,8 +187,9 @@
                         </button>
                     </div>
 
-                    <form x-data :action="'{{ route('users.update', '') }}' + '/' + id"  method="POST">
+                    <form x-data :action="'{{ route('users.update', '') }}' + '/' + id" method="POST">
                         @csrf
+                        <input type="text" name="id" id="id" x-model="id" class="hidden"/>
                         <div class="mb-4">
                             <label for="name" class="block">Nome</label>
                             <input type="text" name="name" id="name" x-model="name"
