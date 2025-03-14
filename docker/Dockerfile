@@ -1,7 +1,7 @@
 FROM php:8.2-fpm
 
-ARG user
-ARG uid
+#ARG user
+#ARG uid
 
 RUN apt-get update && apt-get install -y \
     libfreetype6-dev \
@@ -23,13 +23,13 @@ RUN apt-get update && apt-get install -y \
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-RUN useradd -G www-data,root -u "$uid" -d /home/"$user" "$user" \
-    && mkdir -p /home/"$user"/.composer \
-    && chown -R "$user":"$user" /home/"$user"
+#RUN useradd -G www-data,root -u "$uid" -d /home/"$user" "$user" \
+#    && mkdir -p /home/"$user"/.composer \
+#    && chown -R "$user":"$user" /home/"$user"
 
 WORKDIR /var/www
 
-USER $user
+#USER $user
 
 
 CMD ["php-fpm"]
