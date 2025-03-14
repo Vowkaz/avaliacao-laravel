@@ -2,10 +2,11 @@
 
 namespace App\Policies;
 
+use App\Models\Product;
 use App\Models\User;
 use Illuminate\Auth\Access\Response;
 
-class UserPolicy
+class ProductPolicy
 {
     /**
      * Determine whether the user can view any models.
@@ -20,7 +21,7 @@ class UserPolicy
      */
     public function view(User $user): bool
     {
-        return true;
+        return $user->hasPermissionTo('gestao-produtos');
     }
 
     /**
@@ -28,7 +29,7 @@ class UserPolicy
      */
     public function create(User $user): bool
     {
-        return $user->hasPermissionTo('gestao-usuarios');
+        return $user->hasPermissionTo('gestao-produtos');
     }
 
     /**
@@ -36,7 +37,7 @@ class UserPolicy
      */
     public function update(User $user): bool
     {
-        return $user->hasPermissionTo('gestao-usuarios');
+        return $user->hasPermissionTo('gestao-produtos');
     }
 
     /**
@@ -44,13 +45,13 @@ class UserPolicy
      */
     public function delete(User $user): bool
     {
-        return $user->hasPermissionTo('gestao-usuarios');
+        return $user->hasPermissionTo('gestao-produtos');
     }
 
     /**
      * Determine whether the user can restore the model.
      */
-    public function restore(User $user, User $model): bool
+    public function restore(User $user, Product $product): bool
     {
         return false;
     }
@@ -58,7 +59,7 @@ class UserPolicy
     /**
      * Determine whether the user can permanently delete the model.
      */
-    public function forceDelete(User $user, User $model): bool
+    public function forceDelete(User $user, Product $product): bool
     {
         return false;
     }

@@ -2,10 +2,11 @@
 
 namespace App\Policies;
 
+use App\Models\Brand;
 use App\Models\User;
 use Illuminate\Auth\Access\Response;
 
-class UserPolicy
+class BrandPolicy
 {
     /**
      * Determine whether the user can view any models.
@@ -20,7 +21,7 @@ class UserPolicy
      */
     public function view(User $user): bool
     {
-        return true;
+        return $user->hasPermissionTo('gestao-marcas');
     }
 
     /**
@@ -28,7 +29,7 @@ class UserPolicy
      */
     public function create(User $user): bool
     {
-        return $user->hasPermissionTo('gestao-usuarios');
+        return $user->hasPermissionTo('gestao-marcas');
     }
 
     /**
@@ -36,7 +37,7 @@ class UserPolicy
      */
     public function update(User $user): bool
     {
-        return $user->hasPermissionTo('gestao-usuarios');
+        return $user->hasPermissionTo('gestao-marcas');
     }
 
     /**
@@ -44,13 +45,13 @@ class UserPolicy
      */
     public function delete(User $user): bool
     {
-        return $user->hasPermissionTo('gestao-usuarios');
+        return $user->hasPermissionTo('gestao-marcas');
     }
 
     /**
      * Determine whether the user can restore the model.
      */
-    public function restore(User $user, User $model): bool
+    public function restore(User $user, Brand $brand): bool
     {
         return false;
     }
@@ -58,7 +59,7 @@ class UserPolicy
     /**
      * Determine whether the user can permanently delete the model.
      */
-    public function forceDelete(User $user, User $model): bool
+    public function forceDelete(User $user, Brand $brand): bool
     {
         return false;
     }

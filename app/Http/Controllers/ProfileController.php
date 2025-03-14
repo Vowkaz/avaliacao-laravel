@@ -57,7 +57,7 @@ class ProfileController extends Controller
 
             $user->delete();
             return Redirect::route('users.index')->with('success', 'Usuário removido com sucesso.');
-        } catch (AuthorizationException|\Throwable $e) {
+        } catch (AuthorizationException) {
             return $this->unauthorizedResponse('users.index');
         }
     }
