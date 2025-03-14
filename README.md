@@ -73,17 +73,3 @@ app/
 ```
 
 ---
-
-## 📌 Regras de Desenvolvimento
-
-### 🔹 **Rotas e Métodos**
-
-| Método   | Rota          | Controller                     | Middleware | Descrição           |
-| -------- | ------------- | ------------------------------ | ---------- | ------------------- |
-| `GET`    | `/users`      | `ProfileController@index`      | `auth`     | Lista usuários      |
-| `POST`   | `/users`      | `ProfileController@create`     | `auth`     | Cria um usuário     |
-| `PUT`    | `/users/{id}` | `ProfileController@updateUser` | `auth`     | Atualiza um usuário |
-| `DELETE` | `/users/{id}` | `ProfileController@destroy`    | `auth`     | Remove um usuário   |
-| `GET`    | `/products`   | `ProductController@index`      | `auth`     | Lista produtos      |
-| `POST`   | `/products`   | `ProductController@store`      | `auth`     | Cria um produto     |
-
