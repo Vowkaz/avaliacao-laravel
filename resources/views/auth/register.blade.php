@@ -16,6 +16,16 @@
             <x-input-error :messages="$errors->get('email')" class="mt-2" />
         </div>
 
+        <!-- Role Address -->
+        <div class="mt-4 font-medium text-sm text-gray-700 dark:text-gray-300">
+            <label for="role" class="block">Tipo de Usuário</label>
+            <select name="role" id="role"
+                    class="w-full px-4 py-2 border border-gray-300 rounded bg-white dark:bg-gray-800">
+                <option value="common">Comum</option>
+                <option value="admin">Administrador</option>
+            </select>
+        </div>
+
         <!-- Password -->
         <div class="mt-4">
             <x-input-label for="password" :value="__('Password')" />

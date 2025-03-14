@@ -4,12 +4,17 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
 use App\Models\User;
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Validation\Rules\Password;
 use Illuminate\View\View;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
 class ProfileController extends Controller
 {
@@ -42,40 +47,112 @@ class ProfileController extends Controller
     /**
      * Delete the user's account.
      */
-    public function destroy(Request $request): RedirectResponse
+    public function destroy(int $id): RedirectResponse
     {
-        $request->validateWithBag('userDeletion', [
-            'password' => ['required', 'current_password'],
-        ]);
+        try {
+            $this->authorize('delete', User::class);
 
-        $user = $request->user();
 
-        Auth::logout();
+            $user = User::findOrFail($id);
 
-        $user->delete();
-
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-
-        return Redirect::to('/');
+            $user->delete();
+            return Redirect::route('users.index')->with('success', 'Usuário removido com sucesso.');
+        } catch (AuthorizationException|\Throwable $e) {
+            return $this->unauthorizedResponse('users.index');
+        }
     }
 
-    public function index(): View
+    public function index(): View|RedirectResponse
     {
-        $users = User::all();
+        try {
+            $this->authorize('view', User::class);
 
-        return view('profiles.index', [
-            'users' => $users,
-        ]);
+            $users = User::all();
+            $commonRole = Role::where('name', User::ROLE_ADMIN)->first();
+            $permission = Permission::whereNotIn(
+                'id',
+                $commonRole->permissions()->pluck('id')
+            )->get();
+
+            return view('profiles.index', [
+                'users' => $users,
+                'permissions' => $permission,
+            ]);
+        } catch (AuthorizationException) {
+            return $this->unauthorizedResponse('dashboard');
+        }
     }
 
-    public function create(array $data): View
+    public function updateUser(Request $request, string $userId): RedirectResponse
     {
-        return User::create([
-            'name' => $data['name'],
-            'email' => $data['email'],
-            'password' => Hash::make($data['password']),
-            'role' => $data['role'] ?? 'common',
-        ]);
+        try {
+            $this->authorize('update', User::class);
+
+            $request->validate([
+                'name' => ['required', 'string', 'max:255'],
+                'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class . ',email,' . $userId],
+                'role' => ['required', 'string', 'in:' . implode(',', [User::ROLE_ADMIN, User::ROLE_COMMON])],
+                'permissions' => ['nullable', 'array'],
+                'permissions.*' => ['exists:permissions,name'],
+            ]);
+
+            $user = User::query()
+                ->findOrFail($userId);
+
+            $user->update([
+                'name' => $request->name,
+                'role' => $request->role,
+                'email' => $request->email,
+            ]);
+
+            $user->syncPermissions($request->role === User::ROLE_ADMIN ? [] : $request->permissions);
+
+            if ($user instanceof User) {
+                $user->syncRoles($request->role);
+            }
+
+            event(new Registered($user));
+
+            return Redirect::route('users.index')->with('success', 'Usuário atualizado com sucesso.');
+        } catch (AuthorizationException) {
+            return $this->unauthorizedResponse('users.index');
+        }
+    }
+    public function create(Request $request): RedirectResponse
+    {
+        try {
+            $this->authorize('create', User::class);
+
+            $request->validate([
+                'name' => ['required', 'string', 'max:255'],
+                'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
+                'password' => ['required', 'confirmed', Password::defaults()],
+                'role' => ['required', 'string', 'in:' . implode(',', [User::ROLE_ADMIN, User::ROLE_COMMON])],
+                'permissions' => ['nullable', 'array'],
+                'permissions.*' => ['exists:permissions,name'],
+            ]);
+
+
+            $user = User::create([
+                'name' => $request->name,
+                'role' => $request->role,
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+            ]);
+
+            if ($user instanceof User) {
+                $user->assignRole($request->role);
+            }
+
+            if ($request->has('permissions')) {
+                $user->syncPermissions($request->permissions);
+            }
+
+            event(new Registered($user));
+
+            return Redirect::route('users.index')->with('success', 'Usuário cadastrado com sucesso.');
+        } catch (AuthorizationException) {
+            return $this->unauthorizedResponse('users.index');
+        }
     }
 }

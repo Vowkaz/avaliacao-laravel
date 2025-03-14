@@ -32,6 +32,11 @@ services:
         image: mariadb:latest
         container_name: autogestor-db
         restart: unless-stopped
+        build:
+            args:
+                user: autogestor
+                uid: 1000
+            context: ./
         environment:
             MYSQL_DATABASE: ${DB_DATABASE:-autogestor_db}
             MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-root}

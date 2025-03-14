@@ -14,14 +14,16 @@ Route::group(['middleware' => ['auth', 'verified']], function () {
 
     Route::group(['as' => 'users.', 'prefix' => 'users'], function () {
         Route::get('/', [ProfileController::class, 'index'])->name('index');
-        Route::post('/', [ProfileController::class, 'create'])->name('users_create');
+        Route::post('/', [ProfileController::class, 'create'])->name('create');
+        Route::post('/{id}', [ProfileController::class, 'updateUser'])->name('update');
+        Route::delete('/{id}', [ProfileController::class, 'destroy'])->name('delete');
     });
 });
 
-Route::group(['middleware' => ['auth']], function () {
+Route::group(['middleware' => ['auth', 'permission:gestao-usuarios']], function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';
